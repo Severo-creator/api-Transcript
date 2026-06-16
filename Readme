@@ -1,0 +1,10 @@
+Iniciar venv = source venv/bin/activate
+
+python3 manage.py runserver
+
+python
+
+
+MySql
+mysql -u django_user -p
+senha: 123456
