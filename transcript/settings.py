@@ -56,7 +56,7 @@ ROOT_URLCONF = 'transcript.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'FrontTranscript'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

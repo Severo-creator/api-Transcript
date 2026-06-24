@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gerar Oferta</title>
+</head>
+<body>
+
+<h2>Gerar Oferta</h2>
+
+<form id="form">
+    <label>EAN:</label>
+    <input type="text" id="ean"><br><br>
+
+    <label>Quantidade:</label>
+    <input type="number" id="qtd_ped"><br><br>
+
+    <label>Taxa:</label>
+    <input type="number" step="0.01" id="taxa"><br><br>
+
+    <button type="button" onclick="enviar()">Gerar</button>
+</form>
+
+<pre id="resultado"></pre>
+
+<script>
+function enviar() {
+    const ean = document.getElementById("ean").value;
+    const qtd_ped = document.getElementById("qtd_ped").value;
+    const taxa = document.getElementById("taxa").value;
+
+    fetch(`/api/gerar-oferta/?ean=${ean}&qtd_ped=${qtd_ped}&taxa=${taxa}`)
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById("resultado").innerText =
+                JSON.stringify(data, null, 2);
+        });
+}
+</script>
+
+</body>
+</html>

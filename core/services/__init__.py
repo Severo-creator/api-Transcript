@@ -1,0 +1,1 @@
+from .oferta_service import gerar_oferta

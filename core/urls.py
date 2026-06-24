@@ -1,3 +1,4 @@
+from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import *
 
@@ -12,4 +13,6 @@ router.register(r'opera', OperaViewSet)
 router.register(r'bases', BaseViewSet)
 router.register(r'ncm', NcmViewSet)
 
-urlpatterns = router.urls
+urlpatterns = [
+    path('', include(router.urls)),
+]

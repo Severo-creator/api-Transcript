@@ -14,31 +14,25 @@ from core.models import Oferta
 from core.models import Ncm
 
 def gerar_oferta(ean, qtd_ped, taxa):
-    
+
     base = Base.objects.get(ean=ean)
     rede = Rede.objects.get(ean=ean)
 
-    print(base.ncm)
+    opera = Opera.objects.get(categoria=base.categoria)
+    ncm = Ncm.objects.get(ncm=base.ncm)
 
-    opera = Opera.objects.get(
-        categoria=base.categoria
-    )
-    ncm = Ncm.objects.get(
-        ncm=base.ncm
-    )
     if base.estoque_f < qtd_ped:
-        print("Conteúdo insuficiente.")
-        return
+        return {
+            "sucesso": False,
+            "mensagem": "Estoque insuficiente"
+        }
 
     tributo = opera.total_opera + ncm.tributo_n
     valorprod = base.preco_venda_embalagem_f
 
-    precoferta = valorprod * (1 + tributo  / 100)
-    print("Base:", base)
-    print("Base PK:", base.pk)
-    print("EAN:", base.ean)
+    precoferta = valorprod * (1 + tributo / 100)
 
-    oferta, criada = Oferta.objects.update_or_create(    
+    oferta, criada = Oferta.objects.get_or_create(
         ean=base,
         defaults={
             'sku_f': base.sku_f,
@@ -48,23 +42,25 @@ def gerar_oferta(ean, qtd_ped, taxa):
             'preco_unitario_oferta': precoferta / base.embalagem_f,
             'embalagem_f': base.embalagem_f
         }
-        
     )
 
-    print(oferta.preco_embalagem_oferta)
-    print(rede.preco_venda_r)
+    pedido_criado = False
 
-    if abs((oferta.preco_embalagem_oferta  / rede.preco_venda_r) -1)<= taxa:
-        print("pedido")
-        pedido = Pedido.objects.update_or_create(
+    if abs((oferta.preco_embalagem_oferta / rede.preco_venda_r) - 1) <= taxa:
+        Pedido.objects.get_or_create(
             ean=rede,
-        defaults={
-            'sku_f': base.sku_f,
-            'sku_r': rede.sku_r,
-            'descricao_r': rede.descricao_r,
-            'valortotal_ped': oferta.preco_embalagem_oferta,
-            'qnt_ped': qtd_ped,
-        }
+            defaults={
+                'sku_f': base.sku_f,
+                'sku_r': rede.sku_r,
+                'descricao_r': rede.descricao_r,
+                'valortotal_ped': oferta.preco_embalagem_oferta,
+                'qnt_ped': qtd_ped,
+            }
         )
 
-gerar_oferta('7899706100003', 12, 0.2)
+        pedido_criado = True
+
+    return {
+        "sucesso": True,
+        "pedido_criado": pedido_criado
+    }
