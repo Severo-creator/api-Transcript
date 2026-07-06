@@ -1,41 +1,390 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
-    <title>Gerar Oferta</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Ofertas Validas</title>
+    <style>
+        :root {
+            font-family: Arial, Helvetica, sans-serif;
+            --bg: #f4f7f9;
+            --ink: #18212b;
+            --muted: #66717f;
+            --line: #d7dee6;
+            --panel: #ffffff;
+            --blue: #1d5f99;
+            --green: #16805a;
+            --amber: #a76712;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--bg);
+            color: var(--ink);
+        }
+
+        header {
+            background: #12324a;
+            color: #fff;
+            padding: 28px 40px;
+        }
+
+        header h1 {
+            margin: 0 0 8px;
+            font-size: 30px;
+        }
+
+        header p {
+            margin: 0;
+            max-width: 820px;
+            color: #dce8f2;
+            line-height: 1.5;
+        }
+
+        main {
+            width: min(1120px, calc(100% - 32px));
+            margin: 24px auto 40px;
+            display: grid;
+            gap: 18px;
+        }
+
+        .overview,
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .step,
+        .panel,
+        .metric,
+        .result {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+        }
+
+        .step {
+            padding: 16px;
+            min-height: 132px;
+        }
+
+        .step strong {
+            display: block;
+            color: var(--blue);
+            font-size: 13px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .step h2 {
+            margin: 0 0 8px;
+            font-size: 18px;
+        }
+
+        .step p,
+        .panel p {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.45;
+        }
+
+        .panel {
+            padding: 22px;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+            align-items: end;
+        }
+
+        label {
+            display: grid;
+            gap: 7px;
+            color: #334150;
+            font-weight: 700;
+        }
+
+        input {
+            width: 100%;
+            border: 1px solid #bec8d2;
+            border-radius: 6px;
+            padding: 12px;
+            font-size: 16px;
+            background: #fff;
+            color: var(--ink);
+        }
+
+        button {
+            border: 0;
+            border-radius: 6px;
+            padding: 13px 18px;
+            background: var(--blue);
+            color: #fff;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            min-height: 48px;
+        }
+
+        button:disabled {
+            cursor: wait;
+            opacity: .68;
+        }
+
+        .metric {
+            padding: 16px;
+        }
+
+        .metric span {
+            display: block;
+            color: var(--muted);
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .metric strong {
+            display: block;
+            font-size: 28px;
+            color: var(--ink);
+        }
+
+        .status {
+            border-left: 5px solid var(--amber);
+            padding: 14px 16px;
+            background: #fff7e8;
+            color: #4f3513;
+            border-radius: 6px;
+        }
+
+        .status.ok {
+            border-left-color: var(--green);
+            background: #edf9f3;
+            color: #123f2f;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border-bottom: 1px solid var(--line);
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background: #edf2f6;
+            color: #2d3a47;
+            font-size: 13px;
+        }
+
+        td {
+            color: #2c3743;
+        }
+
+        .empty {
+            color: var(--muted);
+            padding: 18px;
+            background: #fff;
+            border: 1px dashed #b9c5d0;
+            border-radius: 8px;
+        }
+
+        @media (max-width: 820px) {
+            header {
+                padding: 24px 18px;
+            }
+
+            .overview,
+            .controls,
+            .metrics {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
+    <header>
+        <h1>Gerador de Ofertas Validas</h1>
+        <p>Demonstracao do fluxo do gerar_ofertas_validas.py: o sistema cruza fornecedor, rede, categoria e NCM para gravar apenas as ofertas que respeitam a taxa configurada.</p>
+    </header>
 
-<h2>Gerar Oferta</h2>
+    <main>
+        <section class="overview" aria-label="Fluxo do processo">
+            <article class="step">
+                <strong>1. Base</strong>
+                <h2>Le os produtos</h2>
+                <p>Parte da tabela BASE, com EAN, preco, embalagem, estoque e categoria.</p>
+            </article>
+            <article class="step">
+                <strong>2. Regras</strong>
+                <h2>Busca custos</h2>
+                <p>Consulta REDE, OPERA e NCM para compor a regra comercial do produto.</p>
+            </article>
+            <article class="step">
+                <strong>3. Calculo</strong>
+                <h2>Calcula oferta</h2>
+                <p>Aplica tributos e operacao sobre o preco do fornecedor.</p>
+            </article>
+            <article class="step">
+                <strong>4. Validacao</strong>
+                <h2>Grava aprovados</h2>
+                <p>Se estiver dentro da taxa aceita, salva ou atualiza na tabela OFERTA.</p>
+            </article>
+        </section>
 
-<form id="form">
-    <label>EAN:</label>
-    <input type="text" id="ean"><br><br>
+        <section class="panel">
+            <form class="controls" id="form">
+                <label>
+                    Taxa aceita
+                    <input id="taxa" type="number" min="0" step="0.01" value="0.20">
+                </label>
+                <label>
+                    Quantidade minima
+                    <input id="qtd_ped" type="number" min="1" step="1" value="20">
+                </label>
+                <button id="botao" type="submit">Gerar ofertas</button>
+            </form>
+        </section>
 
-    <label>Quantidade:</label>
-    <input type="number" id="qtd_ped"><br><br>
+        <div id="status" class="status">Pronto para executar a demonstracao.</div>
 
-    <label>Taxa:</label>
-    <input type="number" step="0.01" id="taxa"><br><br>
+        <section class="metrics" aria-label="Resumo">
+            <article class="metric">
+                <span>Produtos analisados</span>
+                <strong id="analisados">0</strong>
+            </article>
+            <article class="metric">
+                <span>Ofertas geradas</span>
+                <strong id="criadas">0</strong>
+            </article>
+            <article class="metric">
+                <span>Fora da taxa</span>
+                <strong id="foraTaxa">0</strong>
+            </article>
+            <article class="metric">
+                <span>Sem dados completos</span>
+                <strong id="semDados">0</strong>
+            </article>
+        </section>
 
-    <button type="button" onclick="enviar()">Gerar</button>
-</form>
+        <section class="result">
+            <table id="tabela" hidden>
+                <thead>
+                    <tr>
+                        <th>EAN</th>
+                        <th>Produto</th>
+                        <th>Preco rede</th>
+                        <th>Preco oferta</th>
+                        <th>Diferenca</th>
+                    </tr>
+                </thead>
+                <tbody id="linhas"></tbody>
+            </table>
+            <div id="vazio" class="empty">As ofertas validas aparecem aqui depois da execucao.</div>
+        </section>
+    </main>
 
-<pre id="resultado"></pre>
+    <script>
+        const form = document.getElementById("form");
+        const botao = document.getElementById("botao");
+        const statusBox = document.getElementById("status");
+        const linhas = document.getElementById("linhas");
+        const tabela = document.getElementById("tabela");
+        const vazio = document.getElementById("vazio");
 
-<script>
-function enviar() {
-    const ean = document.getElementById("ean").value;
-    const qtd_ped = document.getElementById("qtd_ped").value;
-    const taxa = document.getElementById("taxa").value;
+        function moeda(valor) {
+            return Number(valor).toLocaleString("pt-BR", {
+                style: "currency",
+                currency: "BRL"
+            });
+        }
 
-    fetch(`/api/gerar-oferta/?ean=${ean}&qtd_ped=${qtd_ped}&taxa=${taxa}`)
-        .then(res => res.json())
-        .then(data => {
-            document.getElementById("resultado").innerText =
-                JSON.stringify(data, null, 2);
+        function atualizarMetricas(data) {
+            document.getElementById("analisados").textContent = data.produtos_analisados || 0;
+            document.getElementById("criadas").textContent = data.ofertas_criadas_ou_atualizadas || 0;
+            document.getElementById("foraTaxa").textContent = data.ignorados?.fora_da_taxa || 0;
+            document.getElementById("semDados").textContent = data.ignorados?.sem_cadastro_completo || 0;
+        }
+
+        function atualizarTabela(produtos) {
+            linhas.innerHTML = "";
+
+            if (!produtos || produtos.length === 0) {
+                tabela.hidden = true;
+                vazio.hidden = false;
+                vazio.textContent = "Nenhuma oferta ficou dentro da taxa configurada.";
+                return;
+            }
+
+            produtos.slice(0, 20).forEach((produto) => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>${produto.ean}</td>
+                    <td>${produto.descricao || "-"}</td>
+                    <td>${moeda(produto.preco_rede)}</td>
+                    <td>${moeda(produto.preco_oferta)}</td>
+                    <td>${produto.diferenca_percentual}%</td>
+                `;
+                linhas.appendChild(tr);
+            });
+
+            tabela.hidden = false;
+            vazio.hidden = true;
+        }
+
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            botao.disabled = true;
+            botao.textContent = "Gerando...";
+            statusBox.className = "status";
+            statusBox.textContent = "Analisando produtos e gravando ofertas validas...";
+
+            try {
+                const response = await fetch("/api/gerar-ofertas-validas/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        taxa: document.getElementById("taxa").value,
+                        qtd_ped: document.getElementById("qtd_ped").value
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.erro || "Nao foi possivel gerar as ofertas.");
+                }
+
+                atualizarMetricas(data);
+                atualizarTabela(data.produtos_validos);
+                statusBox.className = "status ok";
+                statusBox.textContent = data.mensagem;
+            } catch (error) {
+                statusBox.className = "status";
+                statusBox.textContent = error.message;
+            } finally {
+                botao.disabled = false;
+                botao.textContent = "Gerar ofertas";
+            }
         });
-}
-</script>
-
+    </script>
 </body>
 </html>

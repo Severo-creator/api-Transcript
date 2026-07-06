@@ -38,33 +38,34 @@ def gerar_oferta(ean, qtd_ped, taxa):
     print("Base PK:", base.pk)
     print("EAN:", base.ean)
 
-    oferta, criada = Oferta.objects.update_or_create(    
-        ean=base,
-        defaults={
-            'sku_f': base.sku_f,
-            'sku_r': rede.sku_r,
-            'descricao_r': rede.descricao_r,
-            'preco_embalagem_oferta': precoferta,
-            'preco_unitario_oferta': precoferta / base.embalagem_f,
-            'embalagem_f': base.embalagem_f
-        }
+    if abs((precoferta  / rede.preco_venda_r) -1)<= taxa:
+        oferta, criada = Oferta.objects.update_or_create(    
+            ean=base,
+            defaults={
+                'sku_f': base.sku_f,
+                'sku_r': rede.sku_r,
+                'descricao_r': rede.descricao_r,
+                'preco_embalagem_oferta': precoferta,
+                'preco_unitario_oferta': precoferta / base.embalagem_f,
+                'embalagem_f': base.embalagem_f
+            }
         
     )
 
     print(oferta.preco_embalagem_oferta)
     print(rede.preco_venda_r)
 
-    if abs((oferta.preco_embalagem_oferta  / rede.preco_venda_r) -1)<= taxa:
-        print("pedido")
-        pedido = Pedido.objects.update_or_create(
-            ean=rede,
-        defaults={
-            'sku_f': base.sku_f,
-            'sku_r': rede.sku_r,
-            'descricao_r': rede.descricao_r,
-            'valortotal_ped': oferta.preco_embalagem_oferta,
-            'qnt_ped': qtd_ped,
-        }
-        )
+   
+    print("pedido")
+    pedido = Pedido.objects.update_or_create(
+        ean=rede,
+    defaults={
+        'sku_f': base.sku_f,
+        'sku_r': rede.sku_r,
+        'descricao_r': rede.descricao_r,
+        'valortotal_ped': oferta.preco_embalagem_oferta,
+        'qnt_ped': qtd_ped,
+    }
+    )
 
 gerar_oferta('7899706100003', 12, 0.2)

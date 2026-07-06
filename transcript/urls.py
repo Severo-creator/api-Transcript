@@ -17,8 +17,10 @@ Including another URLconf
 # config/urls.py
 from django.contrib import admin
 from django.urls import path, include
+from core.views import oferta_page
 
 urlpatterns = [
+    path('', oferta_page),
     path('admin/', admin.site.urls),
     path('api/', include('core.urls')),
 ]

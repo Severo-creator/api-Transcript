@@ -14,5 +14,6 @@ router.register(r'bases', BaseViewSet)
 router.register(r'ncm', NcmViewSet)
 
 urlpatterns = [
+    path('gerar-ofertas-validas/', GerarOfertasValidasView.as_view()),
     path('', include(router.urls)),
 ]

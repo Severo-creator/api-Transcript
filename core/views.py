@@ -1,9 +1,5 @@
 from django.shortcuts import render
 
-
-
-from .services import gerar_oferta
-
 # Create your views here.
 # core/views.py
 from rest_framework import viewsets
@@ -16,6 +12,11 @@ from rest_framework import status
 
 
 from .services import gerar_oferta
+from .services.ofertas_validas_service import gerar_ofertas_validas
+
+
+def oferta_page(request):
+    return render(request, "oferta.html")
 
 class CategoriaViewSet(viewsets.ModelViewSet):
     queryset = Categoria.objects.all()
@@ -48,6 +49,21 @@ class BaseViewSet(viewsets.ModelViewSet):
 class NcmViewSet(viewsets.ModelViewSet):
     queryset = Ncm.objects.all()
     serializer_class = NcmSerializer
+
+
+class GerarOfertasValidasView(APIView):
+    def post(self, request):
+        try:
+            taxa = float(request.data.get("taxa", 0.2))
+            qtd_ped = int(request.data.get("qtd_ped", 20))
+        except (TypeError, ValueError):
+            return Response(
+                {"erro": "Informe uma taxa e uma quantidade validas."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        resultado = gerar_ofertas_validas(taxa=taxa, qtd_ped=qtd_ped)
+        return Response(resultado)
 
 #from django.views import View
 #from django.shortcuts import render
