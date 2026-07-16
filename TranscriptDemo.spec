@@ -1,9 +1,12 @@
 # -*- mode: python ; coding: utf-8 -*-
 from PyInstaller.utils.hooks import collect_submodules
 
-hiddenimports = ['core', 'transcript']
+hiddenimports = ['core', 'core.views', 'core.services.ofertas_validas_service', 'transcript', 'pandas', 'openpyxl']
 hiddenimports += collect_submodules('django')
 hiddenimports += collect_submodules('rest_framework')
+hiddenimports += collect_submodules('pandas')
+hiddenimports += collect_submodules('openpyxl')
+hiddenimports += collect_submodules('numpy')
 
 
 a = Analysis(
